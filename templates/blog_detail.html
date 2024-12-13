@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="container mt-5 mb-5 mx-auto" style="max-width: 1100px;">
+    <div class="card">
+        <img src="{{ blog.image.url }}" class="card-img-top" alt="{{ blog.title }}"
+             style="width: 100%; max-width: 1100px;">
+
+        <div class="card-body">
+            <h2 class="card-title">{{ blog.title }}</h2>
+            <h3 class="card-subtitle mb-2 text-muted">{{ blog.author }}</h3>
+            <h4 class="card-text">{{ blog.views }} | {{ blog.created_at|date:"H:i" }}</h4>
+            <p class="card-text">{{ blog.description }}</p>
+            {% if request.user.username == blog.author.username %}
+            <a href="{% url 'edit-blog' blog.id %}">
+                <button class="btn btn-success">Edit Blog</button>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+    <hr>
+    <div class="col-md-10">
+        <form method="post">
+            {% csrf_token %}
+            <label for="inputPassword5" class="form-label">Comment</label>
+            <div class="d-flex">
+                <input type="text" name="comment" id="inputPassword5" class="form-control"
+                       aria-describedby="passwordHelpBlock">
+                {% if request.user.is_authenticated %}
+                <button class="btn btn-success ms-2">Add Comment</button>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary mx-2 ">Login</a>
+                {% endif %}
+            </div>
+        </form>
+        <hr>
+        <div class="accordion" id="accordionExample">
+            {% for c in comments %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse{{c.id}}" aria-expanded="true" aria-controls="collapse{{c.id}}">
+                        {{c.author.username}}
+                    </button>
+                </h2>
+                <div id="collapse{{c.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                     data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        {{ c.content }}
+                        {% if request.user.username == c.author.username %}
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <a href="{% url 'edit-comment' c.id %}">
+                                <button class="btn btn-warning">Edit Comment</button>
+                            </a>
+                            <a href="{% url 'delete-comment' c.id %}">
+                                <button class="btn btn-danger">Delete Comment</button>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
